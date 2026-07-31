@@ -72,16 +72,16 @@ export async function sendWelcomeEmail(to: string, userName?: string): Promise<{
       from: fromAddress,
       to: recipientEmail,
       replyTo: smtpUser || fromAddress,
-      subject: 'Welcome to ATS Score Checker - Account Created Successfully!',
-      text: `Hello ${displayName},\n\nWelcome! You have successfully created your account and logged in to the ATS Score Checker.\n\nYou can now upload your resume, check ATS match scores against target job descriptions, and optimize your application.\n\nBest regards,\nThe ATS Score Checker Team`,
+      subject: 'Welcome to ATS Score Checker - New Account Created!',
+      text: `Hello ${displayName},\n\nWelcome! Your new account has been successfully created on ATS Score Checker.\n\nYou can now upload your resume, check ATS match scores against target job descriptions, and optimize your application.\n\nBest regards,\nThe ATS Score Checker Team`,
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
           <div style="text-align: center; margin-bottom: 24px;">
             <div style="display: inline-block; background-color: #1877f2; color: #ffffff; width: 52px; height: 52px; line-height: 52px; border-radius: 12px; font-weight: bold; font-size: 22px;">
               ATS
             </div>
-            <h2 style="color: #0f172a; margin-top: 14px; margin-bottom: 4px; font-size: 22px;">Welcome to ATS Score Checker</h2>
-            <p style="color: #64748b; font-size: 14px; margin: 0;">Account Registration & Access Confirmation</p>
+            <h2 style="color: #0f172a; margin-top: 14px; margin-bottom: 4px; font-size: 22px;">New Account Created!</h2>
+            <p style="color: #64748b; font-size: 14px; margin: 0;">Welcome to ATS Score Checker</p>
           </div>
           
           <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;" />
@@ -91,7 +91,7 @@ export async function sendWelcomeEmail(to: string, userName?: string): Promise<{
           </p>
           
           <p style="color: #334155; font-size: 15px; line-height: 1.6;">
-            Congratulations! Your account (<strong>${recipientEmail}</strong>) has been successfully registered and logged in to the <strong>ATS Score Checker</strong> platform.
+            Congratulations! Your new account (<strong>${recipientEmail}</strong>) has been successfully created on the <strong>ATS Score Checker</strong> platform.
           </p>
           
           <div style="background-color: #f8fafc; border-left: 4px solid #1877f2; padding: 18px; border-radius: 8px; margin: 24px 0;">
@@ -106,7 +106,7 @@ export async function sendWelcomeEmail(to: string, userName?: string): Promise<{
           </div>
           
           <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin-top: 24px;">
-            If you did not initiate this account creation, please ignore this email or contact support.
+            If you did not create this account, please ignore this email or contact support.
           </p>
           
           <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
@@ -118,12 +118,92 @@ export async function sendWelcomeEmail(to: string, userName?: string): Promise<{
       `,
     };
 
-    console.log(`✉️ Sending confirmation email from ${fromAddress} to recipient ${recipientEmail}...`);
+    console.log(`✉️ Sending new account created email from ${fromAddress} to recipient ${recipientEmail}...`);
     const info = await transporter.sendMail(mailOptions);
     console.log(`✅ Email sent successfully to ${recipientEmail}! Message ID: ${info.messageId || 'stream'}`);
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
-    console.error(`❌ Error sending email to ${to}:`, error.message || error);
+    console.error(`❌ Error sending welcome email to ${to}:`, error.message || error);
+    return { success: false, error: error.message || String(error) };
+  }
+}
+
+/**
+ * Sends a login notification email to the user when they log in to the application.
+ * @param to Email address of the recipient
+ * @param userName Name of the user (or extracted from email)
+ */
+export async function sendLoginNotificationEmail(to: string, userName?: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const transporter = createTransporter();
+    const displayName = userName || to.split('@')[0] || 'Valued User';
+    const recipientEmail = to.trim();
+
+    const smtpUser = process.env.SMTP_USER;
+    
+    let fromAddress: string;
+    if (smtpUser) {
+      fromAddress = `"ATS Score Checker" <${smtpUser}>`;
+    } else if (process.env.SMTP_FROM) {
+      fromAddress = process.env.SMTP_FROM;
+    } else {
+      fromAddress = '"ATS Score Checker" <noreply@atsscorechecker.com>';
+    }
+
+    const mailOptions = {
+      from: fromAddress,
+      to: recipientEmail,
+      replyTo: smtpUser || fromAddress,
+      subject: 'ATS Score Checker - You Have Logged In',
+      text: `Hello ${displayName},\n\nYou have successfully logged in to your ATS Score Checker account (${recipientEmail}).\n\nIf this was you, you can continue analyzing your resumes and checking job description matches.\nIf you did not perform this login, please reset your password immediately to protect your account.\n\nBest regards,\nThe ATS Score Checker Team`,
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: inline-block; background-color: #1877f2; color: #ffffff; width: 52px; height: 52px; line-height: 52px; border-radius: 12px; font-weight: bold; font-size: 22px;">
+              ATS
+            </div>
+            <h2 style="color: #0f172a; margin-top: 14px; margin-bottom: 4px; font-size: 22px;">You Have Logged In</h2>
+            <p style="color: #64748b; font-size: 14px; margin: 0;">Successful Account Login Alert</p>
+          </div>
+          
+          <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;" />
+          
+          <p style="color: #334155; font-size: 16px; line-height: 1.5;">
+            Hello <strong>${displayName}</strong>,
+          </p>
+          
+          <p style="color: #334155; font-size: 15px; line-height: 1.6;">
+            You have successfully logged in to your <strong>ATS Score Checker</strong> account (<strong>${recipientEmail}</strong>).
+          </p>
+          
+          <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 18px; border-radius: 8px; margin: 24px 0;">
+            <p style="margin: 0; color: #166534; font-size: 15px; font-weight: 600;">
+              ✓ Successful Login Confirmed
+            </p>
+            <p style="margin: 6px 0 0 0; color: #15803d; font-size: 13px;">
+              You can now access your dashboard, upload resumes, and view AI recommendations.
+            </p>
+          </div>
+          
+          <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin-top: 24px;">
+            If you did not perform this login, please reset your password immediately or contact our support team.
+          </p>
+          
+          <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+          
+          <div style="text-align: center; color: #94a3b8; font-size: 12px;">
+            &copy; ${new Date().getFullYear()} ATS Score Checker. All rights reserved.
+          </div>
+        </div>
+      `,
+    };
+
+    console.log(`✉️ Sending login notification email from ${fromAddress} to recipient ${recipientEmail}...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Login notification email sent successfully to ${recipientEmail}! Message ID: ${info.messageId || 'stream'}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error: any) {
+    console.error(`❌ Error sending login notification email to ${to}:`, error.message || error);
     return { success: false, error: error.message || String(error) };
   }
 }

@@ -4,6 +4,7 @@ import { User } from '../models/User.js';
 import mongoose from 'mongoose';
 import { 
   sendWelcomeEmail, 
+  sendLoginNotificationEmail,
   sendPasswordResetEmail, 
   sendPasswordChangedConfirmationEmail 
 } from '../services/emailService.js';
@@ -177,7 +178,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       );
 
       // Send confirmation email asynchronously
-      sendWelcomeEmail(user.email, user.name).catch((err) =>
+      sendLoginNotificationEmail(user.email, user.name).catch((err) =>
         console.error('Email send error:', err)
       );
 
@@ -209,7 +210,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       );
 
       // Send confirmation email asynchronously
-      sendWelcomeEmail(userProfile.email, userProfile.name).catch((err) =>
+      sendLoginNotificationEmail(userProfile.email, userProfile.name).catch((err) =>
         console.error('Email send error:', err)
       );
 
