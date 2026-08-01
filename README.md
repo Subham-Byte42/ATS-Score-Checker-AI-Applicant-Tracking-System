@@ -1,4 +1,4 @@
-# 🥇 AI Resume Analyzer (ATS Score Checker)
+#  AI Resume Analyzer (ATS Score Checker)
 
 > An AI-powered web application that analyzes resumes, calculates an ATS compatibility score, and provides personalized suggestions to help job seekers improve their resumes before applying for jobs.
 
