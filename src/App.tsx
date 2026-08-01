@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { DashboardStats } from './components/DashboardStats';
 import { ResumeUploadForm } from './components/ResumeUploadForm';
@@ -211,6 +211,90 @@ export default function App() {
     });
   };
 
+  const liveStats = useMemo(() => {
+    const count = resumes.length;
+    if (count === 0) {
+      return [
+        {
+          title: 'Resumes Analyzed',
+          value: '0',
+          change: '0',
+          isPositive: true,
+          description: 'no resumes uploaded yet',
+          iconName: 'FileText'
+        },
+        {
+          title: 'Avg. ATS Compatibility',
+          value: '0%',
+          change: '0%',
+          isPositive: true,
+          description: 'average candidate score',
+          iconName: 'CheckCircle2'
+        },
+        {
+          title: 'Job Match Rate',
+          value: '0%',
+          change: '0%',
+          isPositive: true,
+          description: 'average requirements match',
+          iconName: 'Target'
+        },
+        {
+          title: 'Critical Fixes Flagged',
+          value: '0',
+          change: '0',
+          isPositive: true,
+          description: 'formatting & missing skills',
+          iconName: 'AlertTriangle'
+        }
+      ];
+    }
+
+    const avgAts = Math.round(resumes.reduce((sum, r) => sum + (r.atsScore || 0), 0) / count);
+    const avgMatch = Math.round(resumes.reduce((sum, r) => sum + (r.matchScore || r.atsScore || 0), 0) / count);
+    
+    const totalFixes = resumes.reduce((sum, r) => {
+      const missingCount = Array.isArray(r.missingSkills) ? r.missingSkills.length : 0;
+      const formattingCount = Array.isArray(r.formattingIssues) ? r.formattingIssues.length : 0;
+      return sum + missingCount + formattingCount;
+    }, 0);
+
+    return [
+      {
+        title: 'Resumes Analyzed',
+        value: count.toLocaleString(),
+        change: `+${count}`,
+        isPositive: true,
+        description: 'total candidate scans',
+        iconName: 'FileText'
+      },
+      {
+        title: 'Avg. ATS Compatibility',
+        value: `${avgAts}%`,
+        change: avgAts >= 80 ? 'Strong' : 'Improveable',
+        isPositive: avgAts >= 70,
+        description: 'average candidate score',
+        iconName: 'CheckCircle2'
+      },
+      {
+        title: 'Job Match Rate',
+        value: `${avgMatch}%`,
+        change: avgMatch >= 80 ? 'Aligned' : 'Gaps found',
+        isPositive: avgMatch >= 70,
+        description: 'average job requirements match',
+        iconName: 'Target'
+      },
+      {
+        title: 'Critical Fixes Flagged',
+        value: totalFixes.toString(),
+        change: totalFixes > 0 ? `${totalFixes} flagged` : 'Clean',
+        isPositive: totalFixes === 0,
+        description: 'formatting & missing keywords',
+        iconName: 'AlertTriangle'
+      }
+    ];
+  }, [resumes]);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] font-sans flex flex-col selection:bg-blue-100 selection:text-[#1877f2]">
       
@@ -380,7 +464,7 @@ export default function App() {
                     </h3>
                     <span className="text-xs text-[#64748B] font-medium">Real-time Benchmark</span>
                   </div>
-                  <DashboardStats stats={statItems} />
+                  <DashboardStats stats={liveStats} />
                 </div>
               </section>
 
