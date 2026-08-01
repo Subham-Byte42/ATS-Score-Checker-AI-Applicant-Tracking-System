@@ -7,14 +7,16 @@ import resumeRoutes from './src/server/routes/resumeRoutes.js';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   // Middleware for body parsing
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Connect to MongoDB if MONGODB_URI is provided
-  await connectDB();
+  // Connect to MongoDB asynchronously if MONGODB_URI is provided
+  connectDB().catch((err) => {
+    console.error('⚠️ Background MongoDB connection error:', err);
+  });
 
   // API Routes
   app.use('/api/auth', authRoutes);

@@ -1,11 +1,9 @@
-import { createRequire } from 'module';
 import fs from 'fs';
+import * as pdfParseModule from 'pdf-parse';
 
-const require = createRequire(import.meta.url);
-const pdfParseModule = require('pdf-parse');
 const pdfParse = typeof pdfParseModule === 'function' 
   ? pdfParseModule 
-  : (pdfParseModule && typeof pdfParseModule.default === 'function' ? pdfParseModule.default : pdfParseModule);
+  : ((pdfParseModule as any)?.default || pdfParseModule);
 
 export interface PDFExtractionResult {
   text: string;
@@ -79,7 +77,7 @@ export async function extractTextFromPDF(input: string | Buffer): Promise<PDFExt
   }
 
   try {
-    const parseFn = typeof pdfParse === 'function' ? pdfParse : (pdfParseModule?.default || pdfParseModule);
+    const parseFn = typeof pdfParse === 'function' ? pdfParse : ((pdfParseModule as any)?.default || pdfParseModule);
     if (typeof parseFn !== 'function') {
       const fallbackText = cleanExtractedText(pdfBuffer.toString('utf-8'));
       if (fallbackText && fallbackText.length > 20) {
