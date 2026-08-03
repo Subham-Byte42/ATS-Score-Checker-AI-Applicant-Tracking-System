@@ -72,15 +72,15 @@ export async function sendWelcomeEmail(to: string, userName?: string): Promise<{
       from: fromAddress,
       to: recipientEmail,
       replyTo: smtpUser || fromAddress,
-      subject: 'Welcome to ATS Score Checker - New Account Created!',
-      text: `Hello ${displayName},\n\nWelcome! Your new account has been successfully created on ATS Score Checker.\n\nYou can now upload your resume, check ATS match scores against target job descriptions, and optimize your application.\n\nBest regards,\nThe ATS Score Checker Team`,
+      subject: 'Welcome to ATS Score Checker - Account Created!',
+      text: `Hello ${displayName},\n\nWelcome! Your account has been successfully created on ATS Score Checker.\n\nYou can now upload your resume, check ATS match scores against target job descriptions, and optimize your application.\n\nBest regards,\nThe ATS Score Checker Team`,
       html: `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
           <div style="text-align: center; margin-bottom: 24px;">
             <div style="display: inline-block; background-color: #1877f2; color: #ffffff; width: 52px; height: 52px; line-height: 52px; border-radius: 12px; font-weight: bold; font-size: 22px;">
               ATS
             </div>
-            <h2 style="color: #0f172a; margin-top: 14px; margin-bottom: 4px; font-size: 22px;">New Account Created!</h2>
+            <h2 style="color: #0f172a; margin-top: 14px; margin-bottom: 4px; font-size: 22px;">Account Created!</h2>
             <p style="color: #64748b; font-size: 14px; margin: 0;">Welcome to ATS Score Checker</p>
           </div>
           
@@ -91,7 +91,7 @@ export async function sendWelcomeEmail(to: string, userName?: string): Promise<{
           </p>
           
           <p style="color: #334155; font-size: 15px; line-height: 1.6;">
-            Congratulations! Your new account (<strong>${recipientEmail}</strong>) has been successfully created on the <strong>ATS Score Checker</strong> platform.
+            Congratulations! Your account (<strong>${recipientEmail}</strong>) has been successfully created on the <strong>ATS Score Checker</strong> platform.
           </p>
           
           <div style="background-color: #f8fafc; border-left: 4px solid #1877f2; padding: 18px; border-radius: 8px; margin: 24px 0;">
@@ -118,7 +118,7 @@ export async function sendWelcomeEmail(to: string, userName?: string): Promise<{
       `,
     };
 
-    console.log(`✉️ Sending new account created email from ${fromAddress} to recipient ${recipientEmail}...`);
+    console.log(`✉️ Sending account created email from ${fromAddress} to recipient ${recipientEmail}...`);
     const info = await transporter.sendMail(mailOptions);
     console.log(`✅ Email sent successfully to ${recipientEmail}! Message ID: ${info.messageId || 'stream'}`);
     return { success: true, messageId: info.messageId };

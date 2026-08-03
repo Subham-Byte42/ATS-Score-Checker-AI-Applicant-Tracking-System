@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ResumeRecord } from '../types';
 import { DashboardStats } from './DashboardStats';
 import { ResumeUploadForm } from './ResumeUploadForm';
@@ -126,10 +127,18 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
 
       {/* Dashboard Main Content Area */}
       <div className="flex-1 w-full min-w-0 space-y-8">
+        <AnimatePresence mode="wait">
 
         {/* Home Tab View */}
         {activeTab === 'home' && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <motion.div 
+            key="home"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-6"
+          >
             {/* Clean Header Greeting */}
             <div className="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-12 shadow-xs space-y-3">
               <h1 
@@ -381,12 +390,19 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Upload Resume Tab View */}
         {activeTab === 'upload' && (
-          <div className="space-y-8 animate-in fade-in duration-200">
+          <motion.div 
+            key="upload"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-8"
+          >
             <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs">
               <div className="max-w-3xl mx-auto space-y-6">
                 <div className="text-center space-y-2">
@@ -407,22 +423,37 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
                 }} />
               </div>
             </section>
-          </div>
+          </motion.div>
         )}
 
         {/* AI Suggestions / Chatbot Tab View */}
         {activeTab === 'suggestions' && (
-          <AiChatbotModule
-            resumes={safeResumes}
-            user={user}
-            onSelectResume={onSelectResume}
-            onNavigateToUpload={() => setActiveTab('upload')}
-          />
+          <motion.div
+            key="suggestions"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <AiChatbotModule
+              resumes={safeResumes}
+              user={user}
+              onSelectResume={onSelectResume}
+              onNavigateToUpload={() => setActiveTab('upload')}
+            />
+          </motion.div>
         )}
 
         {/* History Tab View */}
         {activeTab === 'history' && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <motion.div 
+            key="history"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-6"
+          >
             <div className="flex items-center justify-between pb-2 border-b border-slate-200">
               <div>
                 <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
@@ -445,9 +476,10 @@ export const UserDashboardPage: React.FC<UserDashboardPageProps> = ({
               onSelectResume={onSelectResume}
               onDeleteResume={onDeleteResume}
             />
-          </div>
+          </motion.div>
         )}
 
+        </AnimatePresence>
       </div>
     </div>
   );

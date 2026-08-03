@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { StatItem } from '../types';
 import { 
   FileText, 
@@ -32,15 +33,19 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats = [] }) =>
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {(stats || []).map((stat, idx) => (
-        <div
+        <motion.div
           key={idx}
-          className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-200 group"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: idx * 0.08, ease: 'easeOut' }}
+          whileHover={{ y: -4, transition: { duration: 0.2 } }}
+          className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-shadow duration-200 group"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
               {stat.title}
             </span>
-            <div className="w-9 h-9 rounded-xl bg-[#F8FAFC] border border-slate-100 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-xl bg-[#F8FAFC] border border-slate-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
               {getIcon(stat.iconName)}
             </div>
           </div>
@@ -68,8 +73,9 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ stats = [] }) =>
           <p className="mt-2 text-xs text-[#64748B] font-medium">
             {stat.description}
           </p>
-        </div>
+        </motion.div>
       ))}
     </div>
   );
 };
+

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ResumeRecord } from '../types';
 import { 
   Sparkles, 
@@ -502,8 +503,11 @@ What specific area would you like to dive deeper into? (e.g., bullet point rewri
               currentMessages.map((msg) => {
                 const isUser = msg.sender === 'user';
                 return (
-                  <div
+                  <motion.div
                     key={msg.id}
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.2 }}
                     className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
                   >
                     {/* Avatar */}
@@ -559,7 +563,7 @@ What specific area would you like to dive deeper into? (e.g., bullet point rewri
                         )}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })
             ) : (

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ResumeRecord } from '../types';
 import { downloadResumePDF } from '../utils/pdfExport';
 import { AiSuggestionsModule } from './AiSuggestionsModule';
@@ -47,9 +48,21 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ resume, onClose })
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+    >
       
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col relative">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col relative"
+      >
         
         {/* Modal Header */}
         <div className="p-6 bg-gradient-to-r from-blue-50 via-slate-50 to-white border-b border-slate-200 flex items-center justify-between shrink-0">
@@ -107,239 +120,257 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ resume, onClose })
 
         {/* Modal Scrollable Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
-          {activeTab === 'ai-suggestions' ? (
-            <AiSuggestionsModule
-              resumeId={resume.id}
-              candidateName={resume.candidateName}
-              targetRole={resume.targetRole}
-            />
-          ) : (
-            <>
-          
-          {/* Top Score Banner */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <AnimatePresence mode="wait">
+            {activeTab === 'ai-suggestions' ? (
+              <motion.div
+                key="ai-suggestions"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <AiSuggestionsModule
+                  resumeId={resume.id}
+                  candidateName={resume.candidateName}
+                  targetRole={resume.targetRole}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="overview"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
             
-            {/* ATS Compatibility Score */}
-            <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#1877f2] text-white font-black text-xl flex items-center justify-center shrink-0 shadow-xs">
-                {resume.atsScore}
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">ATS Score</p>
-                <p className="text-xs font-extrabold text-[#0F172A]">
-                  {resume.category || (resume.atsScore >= 85 ? 'Top Candidate' : resume.atsScore >= 70 ? 'Excellent' : 'Needs Work')}
-                </p>
-              </div>
-            </div>
-
-            {/* Confidence Score */}
-            <div className="p-3.5 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs">
-                {resume.confidence || 95}%
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Confidence</p>
-                <p className="text-xs font-extrabold text-[#0F172A]">Parser Reliability</p>
-              </div>
-            </div>
-
-            {/* Job Match Score */}
-            <div className="p-3.5 bg-sky-50/70 border border-sky-200/80 rounded-2xl flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#1877f2] text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs">
-                {resume.matchScore}%
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Role Match</p>
-                <p className="text-xs font-extrabold text-[#0F172A]">
-                  {resume.matchScore >= 80 ? 'Strong Alignment' : 'Keyword Gap'}
-                </p>
-              </div>
-            </div>
-
-            {/* Parser Status */}
-            <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs">
-                <Award className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">ATS Status</p>
-                <p className="text-xs font-extrabold text-[#0F172A]">Workday & Taleo Ready</p>
-              </div>
-            </div>
-
-          </div>
-
-          {/* 8 Weighted Section Scores Grid */}
-          <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/90 space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                <ListChecks className="w-4 h-4 text-[#1877f2]" />
-                Weighted ATS Criteria Breakdown (100% Total)
-              </h4>
-              <span className="text-[11px] font-bold text-slate-500">Hybrid Rule + AI Engine</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              {[
-                { label: 'Resume Parsing', weight: '10%', score: resume.sectionScores?.parsing ?? 85 },
-                { label: 'ATS Formatting & Layout', weight: '20%', score: resume.sectionScores?.formatting ?? 88 },
-                { label: 'Keyword Match & Context', weight: '20%', score: resume.sectionScores?.keywords ?? 80 },
-                { label: 'Skills & Competencies', weight: '15%', score: resume.sectionScores?.skills ?? 82 },
-                { label: 'Work Experience Depth', weight: '15%', score: resume.sectionScores?.experience ?? 78 },
-                { label: 'Projects & Repository Links', weight: '10%', score: resume.sectionScores?.projects ?? 85 },
-                { label: 'Grammar & Active Voice', weight: '5%', score: resume.sectionScores?.grammar ?? 92 },
-                { label: 'Education & Qualifications', weight: '5%', score: resume.sectionScores?.education ?? 95 },
-              ].map((item, idx) => (
-                <div key={idx} className="p-2.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5 shadow-2xs">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-slate-700">{item.label} <span className="text-[10px] font-bold text-slate-400">({item.weight})</span></span>
-                    <span className="font-extrabold text-[#1877f2]">{item.score}/100</span>
-                  </div>
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        item.score >= 85
-                          ? 'bg-emerald-500'
-                          : item.score >= 70
-                          ? 'bg-[#1877f2]'
-                          : 'bg-amber-500'
-                      }`}
-                      style={{ width: `${item.score}%` }}
-                    />
-                  </div>
+            {/* Top Score Banner */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              
+              {/* ATS Compatibility Score */}
+              <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#1877f2] text-white font-black text-xl flex items-center justify-center shrink-0 shadow-xs">
+                  {resume.atsScore}
                 </div>
-              ))}
-            </div>
-          </div>
+                <div>
+                  <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">ATS Score</p>
+                  <p className="text-xs font-extrabold text-[#0F172A]">
+                    {resume.category || (resume.atsScore >= 85 ? 'Top Candidate' : resume.atsScore >= 70 ? 'Excellent' : 'Needs Work')}
+                  </p>
+                </div>
+              </div>
 
-          {/* Missing Sections Audit */}
-          {resume.missingSections && resume.missingSections.length > 0 && (
-            <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2">
-              <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
-                <AlertCircle className="w-4 h-4 text-amber-600" />
-                Missing Core Resume Sections ({resume.missingSections.length})
+              {/* Confidence Score */}
+              <div className="p-3.5 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs">
+                  {resume.confidence || 95}%
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Confidence</p>
+                  <p className="text-xs font-extrabold text-[#0F172A]">Parser Reliability</p>
+                </div>
+              </div>
+
+              {/* Job Match Score */}
+              <div className="p-3.5 bg-sky-50/70 border border-sky-200/80 rounded-2xl flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#1877f2] text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs">
+                  {resume.matchScore}%
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">Role Match</p>
+                  <p className="text-xs font-extrabold text-[#0F172A]">
+                    {resume.matchScore >= 80 ? 'Strong Alignment' : 'Keyword Gap'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Parser Status */}
+              <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black text-lg flex items-center justify-center shrink-0 shadow-xs">
+                  <Award className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider">ATS Status</p>
+                  <p className="text-xs font-extrabold text-[#0F172A]">Workday & Taleo Ready</p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* 8 Weighted Section Scores Grid */}
+            <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/90 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <ListChecks className="w-4 h-4 text-[#1877f2]" />
+                  Weighted ATS Criteria Breakdown (100% Total)
+                </h4>
+                <span className="text-[11px] font-bold text-slate-500">Hybrid Rule + AI Engine</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {[
+                  { label: 'Resume Parsing', weight: '10%', score: resume.sectionScores?.parsing ?? 85 },
+                  { label: 'ATS Formatting & Layout', weight: '20%', score: resume.sectionScores?.formatting ?? 88 },
+                  { label: 'Keyword Match & Context', weight: '20%', score: resume.sectionScores?.keywords ?? 80 },
+                  { label: 'Skills & Competencies', weight: '15%', score: resume.sectionScores?.skills ?? 82 },
+                  { label: 'Work Experience Depth', weight: '15%', score: resume.sectionScores?.experience ?? 78 },
+                  { label: 'Projects & Repository Links', weight: '10%', score: resume.sectionScores?.projects ?? 85 },
+                  { label: 'Grammar & Active Voice', weight: '5%', score: resume.sectionScores?.grammar ?? 92 },
+                  { label: 'Education & Qualifications', weight: '5%', score: resume.sectionScores?.education ?? 95 },
+                ].map((item, idx) => (
+                  <div key={idx} className="p-2.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5 shadow-2xs">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-slate-700">{item.label} <span className="text-[10px] font-bold text-slate-400">({item.weight})</span></span>
+                      <span className="font-extrabold text-[#1877f2]">{item.score}/100</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${item.score}%` }}
+                        transition={{ duration: 0.8, delay: idx * 0.05, ease: 'easeOut' }}
+                        className={`h-full rounded-full ${
+                          item.score >= 85
+                            ? 'bg-emerald-500'
+                            : item.score >= 70
+                            ? 'bg-[#1877f2]'
+                            : 'bg-amber-500'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Missing Sections Audit */}
+            {resume.missingSections && resume.missingSections.length > 0 && (
+              <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-2">
+                <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                  Missing Core Resume Sections ({resume.missingSections.length})
+                </h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {resume.missingSections.map((sec, i) => (
+                    <span key={i} className="px-2.5 py-1 bg-white border border-amber-300 rounded-lg text-xs font-bold text-amber-900 shadow-2xs">
+                      ⚠️ {sec}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Resume Strengths */}
+            <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
+              <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                Resume Strengths ({strengths.length})
+              </h4>
+              <ul className="space-y-1.5">
+                {strengths.map((str, i) => (
+                  <li key={i} className="text-xs text-slate-800 font-semibold flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span>{str}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Missing Skills */}
+            <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
+              <h4 className="text-xs font-bold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-rose-600" />
+                Missing Skills ({missingSkills.length})
               </h4>
               <div className="flex flex-wrap gap-1.5">
-                {resume.missingSections.map((sec, i) => (
-                  <span key={i} className="px-2.5 py-1 bg-white border border-amber-300 rounded-lg text-xs font-bold text-amber-900 shadow-2xs">
-                    ⚠️ {sec}
+                {missingSkills.map((sk, i) => (
+                  <span
+                    key={i}
+                    className="px-2.5 py-1 bg-white border border-rose-200 rounded-lg text-xs font-semibold text-rose-800 shadow-2xs"
+                  >
+                    {sk}
                   </span>
                 ))}
               </div>
             </div>
-          )}
 
-          {/* Resume Strengths */}
-          <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
-            <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              Resume Strengths ({strengths.length})
-            </h4>
-            <ul className="space-y-1.5">
-              {strengths.map((str, i) => (
-                <li key={i} className="text-xs text-slate-800 font-semibold flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                  <span>{str}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Missing Skills */}
-          <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
-            <h4 className="text-xs font-bold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
-              <AlertCircle className="w-4 h-4 text-rose-600" />
-              Missing Skills ({missingSkills.length})
-            </h4>
-            <div className="flex flex-wrap gap-1.5">
-              {missingSkills.map((sk, i) => (
-                <span
-                  key={i}
-                  className="px-2.5 py-1 bg-white border border-rose-200 rounded-lg text-xs font-semibold text-rose-800 shadow-2xs"
-                >
-                  {sk}
-                </span>
-              ))}
+            {/* Improvement Suggestions */}
+            <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
+              <h4 className="text-xs font-bold text-[#1877f2] uppercase tracking-wider flex items-center gap-1.5">
+                <ListChecks className="w-4 h-4 text-[#1877f2]" />
+                Improvement Suggestions ({suggestions.length})
+              </h4>
+              <ul className="space-y-1.5">
+                {suggestions.map((sug, i) => (
+                  <li key={i} className="text-xs text-slate-800 font-medium flex items-center gap-2">
+                    <Sparkles className="w-3.5 h-3.5 text-[#1877f2] shrink-0" />
+                    <span>{sug}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          {/* Improvement Suggestions */}
-          <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
-            <h4 className="text-xs font-bold text-[#1877f2] uppercase tracking-wider flex items-center gap-1.5">
-              <ListChecks className="w-4 h-4 text-[#1877f2]" />
-              Improvement Suggestions ({suggestions.length})
-            </h4>
-            <ul className="space-y-1.5">
-              {suggestions.map((sug, i) => (
-                <li key={i} className="text-xs text-slate-800 font-medium flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-[#1877f2] shrink-0" />
-                  <span>{sug}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+            {/* Recommended Certifications & Projects */}
+            {((resume.recommendedCertifications && resume.recommendedCertifications.length > 0) ||
+              (resume.recommendedProjects && resume.recommendedProjects.length > 0)) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {resume.recommendedCertifications && resume.recommendedCertifications.length > 0 && (
+                  <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2">
+                    <h4 className="text-xs font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-[#1877f2]" />
+                      Recommended Certifications
+                    </h4>
+                    <ul className="space-y-1 text-xs text-slate-700 font-medium">
+                      {resume.recommendedCertifications.map((cert, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#1877f2]"></span>
+                          <span>{cert}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-          {/* Recommended Certifications & Projects */}
-          {((resume.recommendedCertifications && resume.recommendedCertifications.length > 0) ||
-            (resume.recommendedProjects && resume.recommendedProjects.length > 0)) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {resume.recommendedCertifications && resume.recommendedCertifications.length > 0 && (
-                <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2">
-                  <h4 className="text-xs font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <Award className="w-4 h-4 text-[#1877f2]" />
-                    Recommended Certifications
-                  </h4>
-                  <ul className="space-y-1 text-xs text-slate-700 font-medium">
-                    {resume.recommendedCertifications.map((cert, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#1877f2]"></span>
-                        <span>{cert}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {resume.recommendedProjects && resume.recommendedProjects.length > 0 && (
+                  <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2">
+                    <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-emerald-600" />
+                      Recommended Projects
+                    </h4>
+                    <ul className="space-y-1 text-xs text-slate-700 font-medium">
+                      {resume.recommendedProjects.map((proj, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span>{proj}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
 
-              {resume.recommendedProjects && resume.recommendedProjects.length > 0 && (
-                <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2">
-                  <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-emerald-600" />
-                    Recommended Projects
-                  </h4>
-                  <ul className="space-y-1 text-xs text-slate-700 font-medium">
-                    {resume.recommendedProjects.map((proj, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>{proj}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {/* Recommended Roles */}
+            <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
+              <h4 className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Briefcase className="w-4 h-4 text-indigo-600" />
+                Recommended Roles ({recommendedRoles.length})
+              </h4>
+              <div className="flex flex-wrap gap-1.5">
+                {recommendedRoles.map((role, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-900 shadow-2xs"
+                  >
+                    {role}
+                  </span>
+                ))}
+              </div>
             </div>
-          )}
 
-          {/* Recommended Roles */}
-          <div className="p-4 bg-[#F8FAFC] rounded-2xl border border-slate-200 space-y-2.5">
-            <h4 className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
-              <Briefcase className="w-4 h-4 text-indigo-600" />
-              Recommended Roles ({recommendedRoles.length})
-            </h4>
-            <div className="flex flex-wrap gap-1.5">
-              {recommendedRoles.map((role, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-900 shadow-2xs"
-                >
-                  {role}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          </>
-          )}
-
+            </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Modal Footer Actions */}
@@ -364,8 +395,9 @@ export const AnalysisModal: React.FC<AnalysisModalProps> = ({ resume, onClose })
           </div>
         </div>
 
-      </div>
+      </motion.div>
 
-    </div>
+    </motion.div>
   );
 };
+

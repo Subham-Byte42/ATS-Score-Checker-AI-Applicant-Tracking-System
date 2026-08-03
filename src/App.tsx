@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'motion/react';
+import { auth, signOut } from './lib/firebase';
 import { Navbar } from './components/Navbar';
 import { DashboardStats } from './components/DashboardStats';
 import { ResumeUploadForm } from './components/ResumeUploadForm';
@@ -183,7 +185,12 @@ export default function App() {
     syncUserResumes(userData.email);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.warn('Firebase signout error:', e);
+    }
     setUser(null);
     localStorage.removeItem('ats_user_session');
     localStorage.removeItem('authToken');
@@ -327,17 +334,38 @@ export default function App() {
             /* Public Landing Page */
             <>
               {/* Welcome Banner / Hero (#home) */}
-              <section id="home" className="rounded-3xl bg-white border border-slate-200/90 p-8 sm:p-12 text-center shadow-2xs space-y-6">
-                <div className="max-w-3xl mx-auto space-y-4">
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#0F172A] leading-tight">
+              <motion.section 
+                id="home"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="rounded-3xl bg-white border border-slate-200/90 p-8 sm:p-12 text-center shadow-2xs space-y-6 relative overflow-hidden"
+              >
+                <div className="max-w-3xl mx-auto space-y-4 relative z-10">
+                  <motion.h1 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                    className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#0F172A] leading-tight"
+                  >
                     Build a Resume That Gets Interview Calls.
-                  </h1>
+                  </motion.h1>
 
-                  <p className="text-base sm:text-lg text-[#64748B] font-medium max-w-2xl mx-auto leading-relaxed">
+                  <motion.p 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                    className="text-base sm:text-lg text-[#64748B] font-medium max-w-2xl mx-auto leading-relaxed"
+                  >
                     Land Your Dream Job with AI-Powered Resume Analysis.
-                  </p>
+                  </motion.p>
 
-                  <div className="pt-4 flex items-center justify-center gap-4 flex-wrap">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.3 }}
+                    className="pt-4 flex items-center justify-center gap-4 flex-wrap"
+                  >
                     <button
                       onClick={() => handleOpenAuth('signup')}
                       className="px-8 py-3.5 bg-[#1877f2] hover:bg-[#0866ff] text-white font-extrabold text-base rounded-md shadow-md shadow-blue-500/20 active:scale-[0.99] transition-all cursor-pointer flex items-center gap-2.5"
@@ -353,9 +381,9 @@ export default function App() {
                       <LogIn className="w-5 h-5 text-[#64748B]" />
                       <span>Log In</span>
                     </button>
-                  </div>
+                  </motion.div>
                 </div>
-              </section>
+              </motion.section>
 
               {/* Features Section (#features) */}
               <section id="features" className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-10 space-y-8 shadow-2xs">
@@ -571,28 +599,6 @@ export default function App() {
                   AI-Powered Resume Analysis & Career Intelligence
                 </p>
               </div>
-            </div>
-
-            {/* Quick Links */}
-            <div className="flex items-center gap-6 text-xs sm:text-sm font-semibold text-slate-400">
-              <button onClick={() => handleNavigate('home')} className="hover:text-white transition-colors cursor-pointer">
-                Home
-              </button>
-              <button onClick={() => handleNavigate('features')} className="hover:text-white transition-colors cursor-pointer">
-                Features
-              </button>
-              <button onClick={() => handleNavigate('how-it-works')} className="hover:text-white transition-colors cursor-pointer">
-                How it Works
-              </button>
-              {user ? (
-                <button onClick={() => setCurrentPage('dashboard')} className="hover:text-white transition-colors cursor-pointer">
-                  Dashboard
-                </button>
-              ) : (
-                <button onClick={() => handleOpenAuth('signup')} className="hover:text-white transition-colors cursor-pointer">
-                  Get Started
-                </button>
-              )}
             </div>
           </div>
 

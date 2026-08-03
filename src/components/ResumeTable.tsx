@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { ResumeRecord } from '../types';
 import { downloadResumePDF } from '../utils/pdfExport';
 import { 
@@ -141,9 +142,12 @@ export const ResumeTable: React.FC<ResumeTableProps> = ({
                 </td>
               </tr>
             ) : (
-              filteredResumes.map((resume) => (
-                <tr
+              filteredResumes.map((resume, idx) => (
+                <motion.tr
                   key={resume.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: idx * 0.04 }}
                   className="hover:bg-blue-50/30 transition-colors group"
                 >
                   {/* Candidate Name & File */}
@@ -191,7 +195,10 @@ export const ResumeTable: React.FC<ResumeTableProps> = ({
                         <span>{resume.matchScore}%</span>
                       </div>
                       <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${resume.matchScore}%` }}
+                          transition={{ duration: 0.6, delay: 0.1 + idx * 0.05, ease: 'easeOut' }}
                           className={`h-full rounded-full ${
                             resume.matchScore >= 85
                               ? 'bg-[#1877f2]'
@@ -199,8 +206,7 @@ export const ResumeTable: React.FC<ResumeTableProps> = ({
                               ? 'bg-sky-400'
                               : 'bg-amber-500'
                           }`}
-                          style={{ width: `${resume.matchScore}%` }}
-                        ></div>
+                        />
                       </div>
                     </div>
                   </td>
@@ -241,7 +247,7 @@ export const ResumeTable: React.FC<ResumeTableProps> = ({
                       </button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))
             )}
           </tbody>

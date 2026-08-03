@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import { Recommendation } from '../types';
 import { recommendations as defaultRecommendations } from '../data/mockData';
 import { 
@@ -46,7 +47,12 @@ export const AiInsightsCards: React.FC<AiInsightsCardsProps> = ({ recommendation
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       {/* Card 1: AI Fix Recommendations */}
-      <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 sm:p-6 space-y-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 sm:p-6 space-y-4"
+      >
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1877f2] flex items-center justify-center font-bold">
@@ -67,9 +73,13 @@ export const AiInsightsCards: React.FC<AiInsightsCardsProps> = ({ recommendation
         </div>
 
         <div className="space-y-3">
-          {(recommendations || []).map((rec) => (
-            <div
+          {(recommendations || []).map((rec, idx) => (
+            <motion.div
               key={rec.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.25, delay: idx * 0.08 }}
+              whileHover={{ scale: 1.005, transition: { duration: 0.15 } }}
               className={`p-4 rounded-xl border transition-all ${
                 rec.type === 'critical'
                   ? 'bg-rose-50/40 border-rose-200/80 hover:bg-rose-50'
@@ -98,13 +108,18 @@ export const AiInsightsCards: React.FC<AiInsightsCardsProps> = ({ recommendation
                   Auto-Fix with AI →
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Card 2: Skill Compatibility Matrix */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 sm:p-6 space-y-4 flex flex-col justify-between">
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+        className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5 sm:p-6 space-y-4 flex flex-col justify-between"
+      >
         <div>
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#1877f2] flex items-center justify-center font-bold">
@@ -164,7 +179,7 @@ export const AiInsightsCards: React.FC<AiInsightsCardsProps> = ({ recommendation
           </p>
         </div>
 
-      </div>
+      </motion.div>
 
     </div>
   );

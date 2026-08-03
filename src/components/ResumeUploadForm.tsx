@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Upload, 
   FileText, 
@@ -160,56 +161,78 @@ export const ResumeUploadForm: React.FC<ResumeUploadFormProps> = ({ onAnalyze })
         </span>
       </div>
 
-      {/* Loading Banner */}
-      {apiState === 'loading' && (
-        <div className="p-8 text-center space-y-4 bg-blue-50/40 border-b border-blue-100 animate-in fade-in duration-200">
-          <div className="w-14 h-14 rounded-full bg-blue-100 text-[#1877f2] flex items-center justify-center mx-auto shadow-inner">
-            <RefreshCw className="w-7 h-7 animate-spin" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-lg font-extrabold text-[#0F172A]">
-              Analyzing your resume...
-            </h3>
-            <p className="text-xs text-[#64748B] font-medium max-w-md mx-auto">
-              Extracting text, evaluating ATS formatting compliance, matching skills, and computing weighted score pillars...
-            </p>
-          </div>
-          <div className="w-48 h-1.5 bg-blue-200 rounded-full mx-auto overflow-hidden">
-            <div className="w-full h-full bg-[#1877f2] animate-pulse"></div>
-          </div>
-        </div>
-      )}
-
-      {/* Error Banner */}
-      {apiState === 'error' && (
-        <div className="p-6 bg-rose-50 border-b border-rose-200 space-y-3 text-rose-900 animate-in fade-in duration-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
-              <AlertCircle className="w-6 h-6" />
+      <AnimatePresence mode="wait">
+        {/* Loading Banner */}
+        {apiState === 'loading' && (
+          <motion.div 
+            key="loading"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="p-8 text-center space-y-4 bg-blue-50/40 border-b border-blue-100 overflow-hidden"
+          >
+            <div className="w-14 h-14 rounded-full bg-blue-100 text-[#1877f2] flex items-center justify-center mx-auto shadow-inner">
+              <RefreshCw className="w-7 h-7 animate-spin" />
             </div>
-            <div>
-              <h3 className="text-base font-extrabold text-rose-900">
-                Unable to analyze resume
+            <div className="space-y-1">
+              <h3 className="text-lg font-extrabold text-[#0F172A]">
+                Analyzing your resume...
               </h3>
-              <p className="text-xs text-rose-700 font-medium">
-                {errorMessage || 'There was an issue processing your PDF file with Gemini AI. Please verify file format and retry.'}
+              <p className="text-xs text-[#64748B] font-medium max-w-md mx-auto">
+                Extracting text, evaluating ATS formatting compliance, matching skills, and computing weighted score pillars...
               </p>
             </div>
-          </div>
-          <div className="pt-2 flex justify-end">
-            <button
-              onClick={resetForm}
-              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Try Again
-            </button>
-          </div>
-        </div>
-      )}
+            <div className="w-48 h-1.5 bg-blue-200 rounded-full mx-auto overflow-hidden">
+              <div className="w-full h-full bg-[#1877f2] animate-pulse"></div>
+            </div>
+          </motion.div>
+        )}
 
-      {/* Success Analysis Result Panel */}
-      {apiState === 'success' && analysisData && (
-        <div className="p-6 bg-slate-50/80 border-b border-slate-200 space-y-6 animate-in fade-in duration-300">
+        {/* Error Banner */}
+        {apiState === 'error' && (
+          <motion.div 
+            key="error"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="p-6 bg-rose-50 border-b border-rose-200 space-y-3 text-rose-900 overflow-hidden"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-rose-900">
+                  Unable to analyze resume
+                </h3>
+                <p className="text-xs text-rose-700 font-medium">
+                  {errorMessage || 'There was an issue processing your PDF file with Gemini AI. Please verify file format and retry.'}
+                </p>
+              </div>
+            </div>
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={resetForm}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Try Again
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Success Analysis Result Panel */}
+        {apiState === 'success' && analysisData && (
+          <motion.div 
+            key="success"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="p-6 bg-slate-50/80 border-b border-slate-200 space-y-6"
+          >
           
           {/* Status Badge & Header */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-200">
@@ -345,8 +368,9 @@ export const ResumeUploadForm: React.FC<ResumeUploadFormProps> = ({ onAnalyze })
             </div>
           </div>
 
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Form Body - Only visible when not actively showing success state */}
       {apiState !== 'success' && (

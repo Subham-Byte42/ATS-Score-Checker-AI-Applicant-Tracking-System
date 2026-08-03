@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { auth, googleProvider, signInWithPopup } from '../lib/firebase';
 import { 
   X, 
   Mail, 
@@ -13,7 +15,9 @@ import {
   ArrowLeft,
   Loader2,
   KeyRound,
-  RotateCcw
+  RotateCcw,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface AuthModalProps {
@@ -51,12 +55,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
   const [showCustomEmailInput, setShowCustomEmailInput] = useState(false);
 
+  // Password Visibility States
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode || 'signup');
+      setIsLoading(false);
       setSubmitError('');
       setSignupSuccessMsg('');
       setResetSuccessMsg('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setFullName('');
+      setVerificationCode('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setIsGooglePickerOpen(false);
+      setSelectedGoogleAccount(null);
+      setCustomGoogleEmail('');
+      setShowCustomEmailInput(false);
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmNewPassword(false);
     }
   }, [isOpen, initialMode]);
 
@@ -104,6 +130,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setTimeout(() => {
           setSelectedGoogleAccount(null);
           setIsGooglePickerOpen(false);
+          setIsLoading(false);
           if (onLoginSuccess) {
             onLoginSuccess({ name: derivedName, email: googleUserEmail });
           }
@@ -358,12 +385,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     setSubmitError('');
-    setIsGooglePickerOpen(true);
+    setIsLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const googleEmail = user.email || '';
+      const googleName = user.displayName || (googleEmail ? googleEmail.split('@')[0] : 'User');
+
+      if (!googleEmail) {
+        throw new Error('No email associated with this Google account.');
+      }
+
+      await handleSelectGoogleAccount(googleEmail, googleName);
+    } catch (err: any) {
+      console.warn('Firebase Google Auth Popup info (falling back to account chooser if restricted):', err);
+      setIsGooglePickerOpen(true);
+      setIsLoading(false);
+    }
   };
 
   const handleSelectGoogleAccount = async (selectedEmail: string, customName?: string) => {
+    setIsLoading(true);
     setSelectedGoogleAccount(selectedEmail);
     const derivedName = customName || (selectedEmail.includes('alex') ? 'Alex Morgan' : selectedEmail.split('@')[0].replace('.', ' '));
 
@@ -403,6 +447,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setTimeout(() => {
       setSelectedGoogleAccount(null);
       setIsGooglePickerOpen(false);
+      setIsLoading(false);
       if (onLoginSuccess) {
         onLoginSuccess({ name: derivedName, email: selectedEmail });
       }
@@ -418,6 +463,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const handleModalClose = () => {
+    setIsLoading(false);
     setIsGooglePickerOpen(false);
     setShowCustomEmailInput(false);
     setSelectedGoogleAccount(null);
@@ -425,9 +471,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs"
+    >
       
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto relative font-sans">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto relative font-sans"
+      >
         
         {/* Close Button */}
         <button
@@ -809,7 +867,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none" />
                     <input
                       id="newPassword"
-                      type="password"
+                      type={showNewPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       value={newPassword}
                       onChange={(e) => {
@@ -817,7 +875,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         setSubmitError('');
                       }}
                       placeholder=" "
-                      className={`peer w-full pl-9 pr-3.5 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
+                      className={`peer w-full pl-9 pr-9 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
                         newPassword.length > 0 && !isNewPasswordValid
                           ? 'border-amber-300 focus:border-amber-500 focus:ring-amber-100'
                           : 'border-slate-200 focus:border-[#1877f2] focus:ring-blue-100'
@@ -832,6 +890,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     >
                       Enter New Password
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer z-10"
+                      title={showNewPassword ? "Hide password" : "Show password"}
+                    >
+                      {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
 
                   {/* Password criteria checklist for reset */}
@@ -873,7 +939,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none" />
                     <input
                       id="confirmNewPassword"
-                      type="password"
+                      type={showConfirmNewPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       value={confirmNewPassword}
                       onChange={(e) => {
@@ -881,7 +947,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         setSubmitError('');
                       }}
                       placeholder=" "
-                      className={`peer w-full pl-9 pr-3.5 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
+                      className={`peer w-full pl-9 pr-9 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
                         confirmNewPassword.length > 0 && !newPasswordsMatch
                           ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
                           : 'border-slate-200 focus:border-[#1877f2] focus:ring-blue-100'
@@ -896,6 +962,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     >
                       Confirm New Password
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer z-10"
+                      title={showConfirmNewPassword ? "Hide password" : "Show password"}
+                    >
+                      {showConfirmNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
 
                   {confirmNewPassword.length > 0 && !newPasswordsMatch && (
@@ -968,6 +1042,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </div>
                 )}
 
+                {/* Continue with Google Button for both Login and Signup */}
+                <div className="space-y-2 pt-1 pb-1">
+                  <button
+                    type="button"
+                    onClick={handleGoogleSignIn}
+                    disabled={isLoading}
+                    className="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs sm:text-sm rounded-lg shadow-2xs flex items-center justify-center gap-2.5 transition-all cursor-pointer hover:border-slate-300 active:scale-[0.99] disabled:opacity-60"
+                  >
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                      />
+                    </svg>
+                    <span>Continue with Google</span>
+                  </button>
+
+                  <div className="relative flex items-center justify-center my-2">
+                    <div className="border-t border-slate-200 w-full"></div>
+                    <span className="bg-white px-2.5 text-[10px] font-medium text-slate-400 absolute">
+                      or continue with email
+                    </span>
+                  </div>
+                </div>
+
                 {mode === 'login' ? (
                   /* LOGIN MODE FIELDS */
                   <>
@@ -1001,14 +1112,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none" />
                         <input
                           id="login-password"
-                          type="password"
+                          type={showPassword ? 'text' : 'password'}
                           value={password}
                           onChange={(e) => {
                             setPassword(e.target.value);
                             setSubmitError('');
                           }}
                           placeholder=" "
-                          className="peer w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:border-[#1877f2] focus:ring-2 focus:ring-blue-100 transition-all outline-hidden"
+                          className="peer w-full pl-9 pr-9 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:border-[#1877f2] focus:ring-2 focus:ring-blue-100 transition-all outline-hidden"
                           required
                         />
                         <label 
@@ -1019,6 +1130,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         >
                           Enter Password
                         </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer z-10"
+                          title={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
                       </div>
                       <div className="flex justify-end mt-1">
                         <button 
@@ -1088,14 +1207,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none" />
                         <input
                           id="signup-password"
-                          type="password"
+                          type={showPassword ? 'text' : 'password'}
                           value={password}
                           onChange={(e) => {
                             setPassword(e.target.value);
                             setSubmitError('');
                           }}
                           placeholder=" "
-                          className={`peer w-full pl-9 pr-3.5 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
+                          className={`peer w-full pl-9 pr-9 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
                             password.length > 0 && !isPasswordValid 
                               ? 'border-amber-300 focus:border-amber-500 focus:ring-amber-100' 
                               : 'border-slate-200 focus:border-[#1877f2] focus:ring-blue-100'
@@ -1110,6 +1229,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         >
                           Create Password
                         </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer z-10"
+                          title={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
                       </div>
 
                       {/* Password Criteria Alert Box */}
@@ -1151,14 +1278,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10 pointer-events-none" />
                         <input
                           id="confirmPassword"
-                          type="password"
+                          type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => {
                             setConfirmPassword(e.target.value);
                             setSubmitError('');
                           }}
                           placeholder=" "
-                          className={`peer w-full pl-9 pr-3.5 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
+                          className={`peer w-full pl-9 pr-9 py-2 bg-slate-50 border rounded-lg text-xs font-normal text-slate-900 focus:bg-white focus:ring-2 transition-all outline-hidden ${
                             confirmPassword.length > 0 && !passwordsMatch
                               ? 'border-red-300 focus:border-red-500 focus:ring-red-100'
                               : 'border-slate-200 focus:border-[#1877f2] focus:ring-blue-100'
@@ -1173,6 +1300,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         >
                           Confirm Password
                         </label>
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer z-10"
+                          title={showConfirmPassword ? "Hide password" : "Show password"}
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
                       </div>
 
                       {confirmPassword.length > 0 && !passwordsMatch && (
@@ -1258,9 +1393,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </>
         )}
 
-      </div>
+      </motion.div>
 
-    </div>
+    </motion.div>
   );
 };
 
