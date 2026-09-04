@@ -31,11 +31,11 @@ The project uses AI to extract useful information from resumes and presents the 
 | 💻 **GitHub Repository** | View the source code and development |
 | 👤 **LinkedIn** | Connect with me and see my other projects |
 
-**Live Demo:** [YOUR_APP_URL](https://ats-score-checker-615076846565.asia-southeast1.run.app)
+**Live Demo:** [AI-Resume-Analyzer](https://ats-score-checker-615076846565.asia-southeast1.run.app)
 
-**GitHub:** [YOUR_GITHUB_URL](https://github.com/Subham-Byte42)
+**GitHub:** [Github](https://github.com/Subham-Byte42)
 
-**LinkedIn:** [YOUR_LINKEDIN_URL](https://www.linkedin.com/in/subham-meher-147b34385/)
+**LinkedIn:** [LINKEDIN](https://www.linkedin.com/in/subham-meher-147b34385/)
 
 ---
 
@@ -493,9 +493,9 @@ This project is licensed under the **MIT License**.
 
 If you found this project interesting, feel free to check out my other work and connect with me.
 
-- 💻 **GitHub:** [YOUR_GITHUB_URL](https://github.com/Subham-Byte42)
-- 👤 **LinkedIn:** [YOUR_LINKEDIN_URL](https://www.linkedin.com/in/subham-meher-147b34385/)
-- 🌐 **Live Project:** [YOUR_APP_URL](https://ats-score-checker-615076846565.asia-southeast1.run.app)
+- 💻 **GitHub:** [Github](https://github.com/Subham-Byte42)
+- 👤 **LinkedIn:** [LINKEDIN](https://www.linkedin.com/in/subham-meher-147b34385/)
+- 🌐 **Live Project:** [AI-Resume-Analyzer](https://ats-score-checker-615076846565.asia-southeast1.run.app)
 
 ---
 
