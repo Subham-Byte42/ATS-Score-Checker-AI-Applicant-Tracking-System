@@ -2,7 +2,7 @@
 
 ### An AI-powered web application for analyzing, improving, and comparing resumes
 
-[🌐 Live Demo](https://ats-score-checker-615076846565.asia-southeast1.run.app) • [💻 GitHub](https://github.com/Subham-Byte42) • [👤 LinkedIn](https://www.linkedin.com/in/subham-meher-147b34385/)
+[🌐 Live URL](https://ats-score-checker-615076846565.asia-southeast1.run.app) • [💻 GitHub](https://github.com/Subham-Byte42) • [👤 LinkedIn](https://www.linkedin.com/in/subham-meher-147b34385/)
 
 ---
 
@@ -27,11 +27,11 @@ The project uses AI to extract useful information from resumes and presents the 
 
 | Link | Description |
 |---|---|
-| 🌐 **Live Demo** | Try the deployed application |
+| 🌐 **Live URL** | Try the deployed application |
 | 💻 **GitHub Repository** | View the source code and development |
 | 👤 **LinkedIn** | Connect with me and see my other projects |
 
-**Live Demo:** [AI-Resume-Analyzer](https://ats-score-checker-615076846565.asia-southeast1.run.app)
+**Live URL:** [AI-Resume-Analyzer](https://ats-score-checker-615076846565.asia-southeast1.run.app)
 
 **GitHub:** [Github](https://github.com/Subham-Byte42)
 
