@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation for Personal Portal Database Folder
+    function isValidPersonalData(data) {
+      return data is map
+        && data.userId is string && data.userId.size() <= 128
+        && data.portalType == 'personal'
+        && data.fileName is string && data.fileName.size() <= 256
+        && data.atsScore is number;
+    }
+
+    // Validation for Recruiters Portal Database Folder
+    function isValidRecruiterData(data) {
+      return data is map
+        && data.recruiterId is string && data.recruiterId.size() <= 128
+        && data.portalType == 'recruiter'
+        && data.candidateName is string && data.candidateName.size() <= 128;
+    }
+
+    // Personal Portal Database Folder Rules
+    match /personal_portal/{docId} {
+      allow get: if isSignedIn() && isValidId(docId) && (existing().userId == request.auth.uid || existing().userId == request.auth.token.email);
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.userId == request.auth.token.email);
+      allow create: if isSignedIn() && isValidId(docId) && isValidPersonalData(incoming()) && (incoming().userId == request.auth.uid || incoming().userId == request.auth.token.email);
+      allow update: if isSignedIn() && isValidId(docId) && isValidPersonalData(incoming()) && (incoming().userId == request.auth.uid || incoming().userId == request.auth.token.email);
+      allow delete: if isSignedIn() && isValidId(docId) && (existing().userId == request.auth.uid || existing().userId == request.auth.token.email);
+    }
+
+    // Recruiters Portal Database Folder Rules
+    match /recruiters_portal/{docId} {
+      allow get: if isSignedIn() && isValidId(docId) && (existing().recruiterId == request.auth.uid || existing().recruiterId == request.auth.token.email);
+      allow list: if isSignedIn() && (resource.data.recruiterId == request.auth.uid || resource.data.recruiterId == request.auth.token.email);
+      allow create: if isSignedIn() && isValidId(docId) && isValidRecruiterData(incoming()) && (incoming().recruiterId == request.auth.uid || incoming().recruiterId == request.auth.token.email);
+      allow update: if isSignedIn() && isValidId(docId) && isValidRecruiterData(incoming()) && (incoming().recruiterId == request.auth.uid || incoming().recruiterId == request.auth.token.email);
+      allow delete: if isSignedIn() && isValidId(docId) && (existing().recruiterId == request.auth.uid || existing().recruiterId == request.auth.token.email);
+    }
+  }
+}

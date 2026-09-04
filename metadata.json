@@ -1,0 +1,6 @@
+{
+  "name": "ATS Score Checker",
+  "description": "Professional Facebook-blue light themed ATS Score Checker with instant resume scanning, ATS compliance score, and keyword optimization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

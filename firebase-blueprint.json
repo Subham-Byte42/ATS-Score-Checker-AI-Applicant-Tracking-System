@@ -1,0 +1,154 @@
+{
+  "entities": {
+    "PersonalPortalData": {
+      "title": "PersonalPortalData",
+      "description": "Personal use portal resume scans, user profile data, and ATS analysis results",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique record identifier"
+        },
+        "userId": {
+          "type": "string",
+          "description": "User email or auth ID"
+        },
+        "portalType": {
+          "type": "string",
+          "enum": ["personal"],
+          "description": "Portal designation flag"
+        },
+        "fileName": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Name of uploaded resume file"
+        },
+        "candidateName": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Name of the job seeker"
+        },
+        "targetRole": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Target job title"
+        },
+        "fileSize": {
+          "type": "number",
+          "description": "File size in bytes"
+        },
+        "atsScore": {
+          "type": "number",
+          "description": "Overall ATS score percentage"
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Analysis processing status"
+        },
+        "matchScore": {
+          "type": "number",
+          "description": "Role match percentage"
+        },
+        "uploadDate": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Date string of scan"
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 2048,
+          "description": "Executive summary of ATS analysis"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp"
+        }
+      },
+      "required": ["userId", "portalType", "fileName", "atsScore"]
+    },
+    "RecruitersPortalData": {
+      "title": "RecruitersPortalData",
+      "description": "Recruiters portal applicant batch screening, candidate evaluations, and shortlist scorecards",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique evaluation record identifier"
+        },
+        "recruiterId": {
+          "type": "string",
+          "description": "Recruiter user email or auth ID"
+        },
+        "portalType": {
+          "type": "string",
+          "enum": ["recruiter"],
+          "description": "Portal designation flag"
+        },
+        "candidateName": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Name of applicant being evaluated"
+        },
+        "jobTitle": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Job vacancy position"
+        },
+        "requisitionId": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Internal job requisition ID"
+        },
+        "matchScore": {
+          "type": "number",
+          "description": "Job description alignment score"
+        },
+        "atsScore": {
+          "type": "number",
+          "description": "Technical ATS score"
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Recruitment pipeline stage"
+        },
+        "evaluationNotes": {
+          "type": "string",
+          "maxLength": 2048,
+          "description": "Recruiter notes and assessment"
+        },
+        "shortlisted": {
+          "type": "boolean",
+          "description": "Flag indicating if candidate is shortlisted"
+        },
+        "uploadDate": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Date of screening"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "ISO timestamp"
+        }
+      },
+      "required": ["recruiterId", "portalType", "candidateName"]
+    }
+  },
+  "firestore": {
+    "/personal_portal/{docId}": {
+      "schema": {
+        "$ref": "#/entities/PersonalPortalData"
+      },
+      "description": "Database folder dedicated to personal use portal information and user scans"
+    },
+    "/recruiters_portal/{docId}": {
+      "schema": {
+        "$ref": "#/entities/RecruitersPortalData"
+      },
+      "description": "Database folder dedicated to recruiters portal candidate evaluations and screening data"
+    }
+  }
+}
